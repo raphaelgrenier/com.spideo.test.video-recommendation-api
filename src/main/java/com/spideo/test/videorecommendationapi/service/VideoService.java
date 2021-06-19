@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class VideoService {
 
@@ -16,8 +18,12 @@ public class VideoService {
         this.videoRepository = videoRepository;
     }
 
-    public void add(@NonNull Video video) {
-        videoRepository.add(video);
+    public void createOrUpdate(@NonNull Video video) {
+        videoRepository.createOrUpdate(video);
+    }
+
+    public Optional<Video> find(@NonNull String id) {
+        return videoRepository.find(id);
     }
 
 }

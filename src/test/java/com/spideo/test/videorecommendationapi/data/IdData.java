@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum IdData {
 
+    UNKNOWN("unknown"),
     MATRIX("97e343ac-3141-45d1-aff6-68a7465d55ec");
 
     private final String id;

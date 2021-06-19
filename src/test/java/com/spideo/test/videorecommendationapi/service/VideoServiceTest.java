@@ -28,9 +28,29 @@ class VideoServiceTest {
         Video video = new Video(IdData.MATRIX.getId(), TitleData.MATRIX.getTitle(),
                 asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
         // WHEN
-        videoService.add(video);
+        videoService.createOrUpdate(video);
         // THEN
-        verify(videoRepository).add(video);
+        verify(videoRepository).createOrUpdate(video);
+    }
+
+    @Test
+    void should_find_a_video_from_its_id() {
+        // GIVEN
+        String id = IdData.MATRIX.getId();
+        // WHEN
+        videoService.find(id);
+        // THEN
+        verify(videoRepository).find(id);
+    }
+
+    @Test
+    void should_not_find_a_video_from_an_unknown_id() {
+        // GIVEN
+        String id = IdData.UNKNOWN.getId();
+        // WHEN
+        videoService.find(id);
+        // THEN
+        verify(videoRepository).find(id);
     }
 
 }
