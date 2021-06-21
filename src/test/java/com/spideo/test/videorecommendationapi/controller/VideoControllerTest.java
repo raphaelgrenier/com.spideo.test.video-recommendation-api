@@ -71,8 +71,7 @@ class VideoControllerTest {
 
     @Test
     void post_matrix_video_should_respond_success() throws Exception {
-        Video video = new Video(IdData.MATRIX.getId(), TitleData.MATRIX.getTitle(),
-                asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
+        Video video = VideoData.MATRIX.toVideo();
         this.mockMvc.perform(post(VIDEOS_PATH)
                 .contentType(APPLICATION_JSON)
                 .content(mapper.writeValueAsBytes(video)))
@@ -82,8 +81,7 @@ class VideoControllerTest {
     @Test
     void get_matrix_video_should_respond_success() throws Exception {
         String id = IdData.MATRIX.getId();
-        Video video = new Video(id, TitleData.MATRIX.getTitle(),
-                asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
+        Video video = VideoData.MATRIX.toVideo();
         Mockito.when(videoService.find(id)).thenReturn(of(video));
         this.mockMvc.perform(get(VIDEOS_PATH + "/{id}", id))
                 .andExpect(status().isOk())

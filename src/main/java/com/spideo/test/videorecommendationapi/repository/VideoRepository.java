@@ -1,6 +1,8 @@
 package com.spideo.test.videorecommendationapi.repository;
 
-import com.spideo.test.videorecommendationapi.model.Video;
+import com.spideo.test.videorecommendationapi.model.Film;
+import com.spideo.test.videorecommendationapi.model.TvShow;
+import com.spideo.test.videorecommendationapi.model.VideoType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -15,24 +17,38 @@ import static java.util.Comparator.comparing;
 @Repository
 public class VideoRepository {
 
-    private static final Map<String, Video> VIDEO_CACHE = new HashMap<>();
+    private final Map<String, VideoType> videoCache = new HashMap<>();
 
-    public static List<Video> allVideos() {
-        return VIDEO_CACHE.values().stream().toList();
+    public List<VideoType> allVideos() {
+        return videoCache.values().stream().toList();
     }
 
-    public void createOrUpdate(@NonNull Video video) {
-        VIDEO_CACHE.put(video.id(), video);
+    public List<Film> allFilms() {
+        return videoCache.values().stream()
+                .filter(Film.class::isInstance)
+                .map(Film.class::cast)
+                .toList();
     }
 
-    public Optional<Video> find(@NonNull String id) {
-        return Optional.ofNullable(VIDEO_CACHE.get(id));
+    public List<TvShow> allTvShows() {
+        return videoCache.values().stream()
+                .filter(TvShow.class::isInstance)
+                .map(TvShow.class::cast)
+                .toList();
     }
 
-    public List<Video> searchByTitleKeyword(@NonNull String titleKeyword) {
+    public void createOrUpdate(@NonNull VideoType video) {
+        videoCache.put(video.getId(), video);
+    }
+
+    public Optional<VideoType> find(@NonNull String id) {
+        return Optional.ofNullable(videoCache.get(id));
+    }
+
+    public List<VideoType> searchByTitleKeyword(@NonNull String titleKeyword) {
         return allVideos().stream()
-                .filter(video -> video.title().contains(titleKeyword))
-                .sorted(comparing(Video::title))
+                .filter(video -> video.getTitle().contains(titleKeyword))
+                .sorted(comparing(VideoType::getTitle))
                 .collect(Collectors.toList());
     }
 

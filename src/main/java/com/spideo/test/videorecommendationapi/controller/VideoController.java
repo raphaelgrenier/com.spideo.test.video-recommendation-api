@@ -1,6 +1,7 @@
 package com.spideo.test.videorecommendationapi.controller;
 
 import com.spideo.test.videorecommendationapi.model.Video;
+import com.spideo.test.videorecommendationapi.model.VideoType;
 import com.spideo.test.videorecommendationapi.service.VideoService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -43,7 +44,7 @@ public class VideoController {
         this.videoService = videoService;
     }
 
-    @ApiOperation("Adds or fully update a video in the repository")
+    @ApiOperation("Adds or fully updates a video in the repository")
     @ApiResponses({
             @ApiResponse(code = SC_NO_CONTENT, message = "The video posted in the request body was created or updated"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "The video posted in the request body was not formed properly")
@@ -57,7 +58,7 @@ public class VideoController {
     @ApiOperation("Retrieves a video in the repository")
     @ApiResponse(code = SC_NOT_FOUND, message = "The requested video was not found in the repository")
     @GetMapping(value = ID_PATH_PARAM)
-    public Video find(@PathVariable String id) {
+    public VideoType find(@PathVariable String id) {
         return videoService.find(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -65,7 +66,7 @@ public class VideoController {
     @ApiOperation("Search videos by a title keyword")
     @ApiResponse(code = SC_NOT_FOUND, message = "No video matching given title keyword was found")
     @GetMapping
-    public List<Video> searchByTitleKeyword(
+    public List<VideoType> searchByTitleKeyword(
             @RequestParam(value = TITLE_QUERY_PARAM) @Size(min = 3) String titleKeyword) {
         var result = videoService.searchByTitleKeyword(titleKeyword);
         if (result.isEmpty()) {

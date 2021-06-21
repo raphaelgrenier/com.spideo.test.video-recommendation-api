@@ -1,6 +1,8 @@
 package com.spideo.test.videorecommendationapi.service;
 
-import com.spideo.test.videorecommendationapi.model.Video;
+import com.spideo.test.videorecommendationapi.model.Film;
+import com.spideo.test.videorecommendationapi.model.TvShow;
+import com.spideo.test.videorecommendationapi.model.VideoType;
 import com.spideo.test.videorecommendationapi.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -19,16 +21,24 @@ public class VideoService {
         this.videoRepository = videoRepository;
     }
 
-    public void createOrUpdate(@NonNull Video video) {
+    public void createOrUpdate(@NonNull VideoType video) {
         videoRepository.createOrUpdate(video);
     }
 
-    public Optional<Video> find(@NonNull String id) {
+    public Optional<VideoType> find(@NonNull String id) {
         return videoRepository.find(id);
     }
 
-    public List<Video> searchByTitleKeyword(@NonNull String titleKeyword) {
+    public List<VideoType> searchByTitleKeyword(@NonNull String titleKeyword) {
         return videoRepository.searchByTitleKeyword(titleKeyword);
+    }
+
+    public List<Film> allFilms() {
+        return videoRepository.allFilms();
+    }
+
+    public List<TvShow> allTvShows() {
+        return videoRepository.allTvShows();
     }
 
 }

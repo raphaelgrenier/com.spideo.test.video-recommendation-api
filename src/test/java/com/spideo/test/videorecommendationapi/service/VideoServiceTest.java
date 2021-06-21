@@ -60,4 +60,20 @@ class VideoServiceTest {
         verify(videoRepository).searchByTitleKeyword(keyword);
     }
 
+    @Test
+    void should_get_all_films() {
+        // WHEN
+        videoService.allFilms();
+        // THEN
+        verify(videoRepository).allFilms();
+    }
+
+    @Test
+    void should_get_all_tv_shows() {
+        // WHEN
+        videoService.allTvShows();
+        // THEN
+        verify(videoRepository).allTvShows();
+    }
+
 }

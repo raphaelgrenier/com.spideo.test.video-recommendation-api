@@ -20,7 +20,7 @@ public enum VideoData {
     private final List<LabelData> labels;
 
     public final Video toVideo() {
-        return new Video(this.id.getId(), this.title.getTitle(),
+        return new Video(id.getId(), title.getTitle(),
                 this.labels.stream()
                         .map(LabelData::getLabel)
                         .collect(Collectors.toList()));

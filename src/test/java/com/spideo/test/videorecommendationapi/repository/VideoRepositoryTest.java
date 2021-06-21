@@ -1,10 +1,15 @@
 package com.spideo.test.videorecommendationapi.repository;
 
+import com.spideo.test.videorecommendationapi.data.FilmData;
 import com.spideo.test.videorecommendationapi.data.IdData;
 import com.spideo.test.videorecommendationapi.data.LabelData;
 import com.spideo.test.videorecommendationapi.data.TitleData;
+import com.spideo.test.videorecommendationapi.data.TvShowData;
 import com.spideo.test.videorecommendationapi.data.VideoData;
+import com.spideo.test.videorecommendationapi.model.Film;
+import com.spideo.test.videorecommendationapi.model.TvShow;
 import com.spideo.test.videorecommendationapi.model.Video;
+import com.spideo.test.videorecommendationapi.model.VideoType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.Optional;
 
-import static com.spideo.test.videorecommendationapi.repository.VideoRepository.allVideos;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
@@ -31,7 +35,7 @@ class VideoRepositoryTest {
         // WHEN
         videoRepository.createOrUpdate(matrix);
         // THEN
-        assertThat(allVideos()).containsOnly(matrix);
+        assertThat(videoRepository.allVideos()).containsOnly(matrix);
     }
 
     @Test
@@ -44,7 +48,7 @@ class VideoRepositoryTest {
         videoRepository.createOrUpdate(matrix);
         videoRepository.createOrUpdate(updated);
         // THEN
-        assertThat(allVideos()).containsOnly(updated);
+        assertThat(videoRepository.allVideos()).containsOnly(updated);
     }
 
     @Test
@@ -52,7 +56,7 @@ class VideoRepositoryTest {
         // GIVEN
         String id = IdData.UNKNOWN.getId();
         // WHEN
-        Optional<Video> actual = videoRepository.find(id);
+        Optional<VideoType> actual = videoRepository.find(id);
         // THEN
         assertThat(actual).isEmpty();
     }
@@ -63,7 +67,7 @@ class VideoRepositoryTest {
         Video matrix = VideoData.MATRIX.toVideo();
         videoRepository.createOrUpdate(matrix);
         // WHEN
-        Optional<Video> actual = videoRepository.find(matrix.id());
+        Optional<VideoType> actual = videoRepository.find(matrix.id());
         // THEN
         assertThat(actual).isEqualTo(of(matrix));
     }
@@ -76,9 +80,31 @@ class VideoRepositoryTest {
         videoRepository.createOrUpdate(matrix);
         videoRepository.createOrUpdate(matrix2);
         // WHEN
-        List<Video> actual = videoRepository.searchByTitleKeyword("matrix");
+        List<VideoType> actual = videoRepository.searchByTitleKeyword("matrix");
         // THEN
         assertThat(actual).isEqualTo(asList(matrix, matrix2));
+    }
+
+    @Test
+    void should_get_all_films() {
+        // GIVEN
+        Film indianaJones = FilmData.INDIANA_JONES.toFilm();
+        videoRepository.createOrUpdate(indianaJones);
+        // WHEN
+        List<Film> actual = videoRepository.allFilms();
+        // THEN
+        assertThat(actual).isEqualTo(singletonList(indianaJones));
+    }
+
+    @Test
+    void should_get_all_tv_shows() {
+        // GIVEN
+        TvShow stevenSpielberg = TvShowData.BREAKING_BAD.toTvShow();
+        videoRepository.createOrUpdate(stevenSpielberg);
+        // WHEN
+        List<TvShow> actual = videoRepository.allTvShows();
+        // THEN
+        assertThat(actual).isEqualTo(singletonList(stevenSpielberg));
     }
 
 }
