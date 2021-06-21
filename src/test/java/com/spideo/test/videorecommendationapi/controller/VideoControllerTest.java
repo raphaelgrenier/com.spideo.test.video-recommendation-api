@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spideo.test.videorecommendationapi.data.IdData;
 import com.spideo.test.videorecommendationapi.data.LabelData;
 import com.spideo.test.videorecommendationapi.data.TitleData;
+import com.spideo.test.videorecommendationapi.data.VideoData;
 import com.spideo.test.videorecommendationapi.model.Video;
 import com.spideo.test.videorecommendationapi.service.VideoService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.spideo.test.videorecommendationapi.controller.VideoController.ID_PATH_PARAM;
+import static com.spideo.test.videorecommendationapi.controller.VideoController.TITLE_QUERY_PARAM;
 import static com.spideo.test.videorecommendationapi.controller.VideoController.VIDEOS_PATH;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -92,6 +96,24 @@ class VideoControllerTest {
         Mockito.when(videoService.find(id)).thenReturn(empty());
         this.mockMvc.perform(get(VIDEOS_PATH + ID_PATH_PARAM, id))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void get_videos_from_a_title_keyword_should_respond_success() throws Exception {
+        Video matrix = VideoData.MATRIX.toVideo();
+        Video matrix2 = VideoData.MATRIX_2.toVideo();
+        String titleKeyword = "tit";
+        Mockito.when(videoService.searchByTitleKeyword(titleKeyword)).thenReturn(asList(matrix, matrix2));
+        this.mockMvc.perform(get(VIDEOS_PATH).param(TITLE_QUERY_PARAM, titleKeyword))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void get_videos_from_a_too_short_title_keyword_should_respond_bad_request() throws Exception {
+        String titleKeyword = "ti";
+        this.mockMvc.perform(get(VIDEOS_PATH).param(TITLE_QUERY_PARAM, titleKeyword))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(Matchers.containsString(BAD_REQUEST.getReasonPhrase())));
     }
 
 }

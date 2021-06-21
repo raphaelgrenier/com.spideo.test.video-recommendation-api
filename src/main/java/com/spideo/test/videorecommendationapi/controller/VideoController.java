@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.validation.constraints.Size;
+import java.util.List;
 
 import static com.spideo.test.videorecommendationapi.controller.VideoController.VIDEOS_PATH;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -25,10 +29,12 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping(VIDEOS_PATH)
+@Validated
 public class VideoController {
 
     static final String VIDEOS_PATH = "/videos";
     static final String ID_PATH_PARAM = "/{id}";
+    static final String TITLE_QUERY_PARAM = "title";
 
     private final VideoService videoService;
 
@@ -54,6 +60,18 @@ public class VideoController {
     public Video find(@PathVariable String id) {
         return videoService.find(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @ApiOperation("Search videos by a title keyword")
+    @ApiResponse(code = SC_NOT_FOUND, message = "No video matching given title keyword was found")
+    @GetMapping
+    public List<Video> searchByTitleKeyword(
+            @RequestParam(value = TITLE_QUERY_PARAM) @Size(min = 3) String titleKeyword) {
+        var result = videoService.searchByTitleKeyword(titleKeyword);
+        if (result.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return result;
     }
 
 }

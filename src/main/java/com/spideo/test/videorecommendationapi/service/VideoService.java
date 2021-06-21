@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +25,10 @@ public class VideoService {
 
     public Optional<Video> find(@NonNull String id) {
         return videoRepository.find(id);
+    }
+
+    public List<Video> searchByTitleKeyword(@NonNull String titleKeyword) {
+        return videoRepository.searchByTitleKeyword(titleKeyword);
     }
 
 }

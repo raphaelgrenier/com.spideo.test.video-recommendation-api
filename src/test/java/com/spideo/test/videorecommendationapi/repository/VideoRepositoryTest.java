@@ -3,11 +3,13 @@ package com.spideo.test.videorecommendationapi.repository;
 import com.spideo.test.videorecommendationapi.data.IdData;
 import com.spideo.test.videorecommendationapi.data.LabelData;
 import com.spideo.test.videorecommendationapi.data.TitleData;
+import com.spideo.test.videorecommendationapi.data.VideoData;
 import com.spideo.test.videorecommendationapi.model.Video;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.spideo.test.videorecommendationapi.repository.VideoRepository.allVideos;
@@ -25,23 +27,21 @@ class VideoRepositoryTest {
     @Test
     void should_create_a_video() {
         // GIVEN
-        Video video = new Video(IdData.MATRIX.getId(), TitleData.MATRIX.getTitle(),
-                asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
+        Video matrix = VideoData.MATRIX.toVideo();
         // WHEN
-        videoRepository.createOrUpdate(video);
+        videoRepository.createOrUpdate(matrix);
         // THEN
-        assertThat(allVideos()).containsOnly(video);
+        assertThat(allVideos()).containsOnly(matrix);
     }
 
     @Test
     void should_update_a_video() {
         // GIVEN
-        Video video = new Video(IdData.MATRIX.getId(), TitleData.MATRIX.getTitle(),
-                asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
-        Video updated = new Video(video.id(), TitleData.MATRIX.getTitle(),
+        Video matrix = VideoData.MATRIX.toVideo();
+        Video updated = new Video(matrix.id(), TitleData.MATRIX.getTitle(),
                 singletonList(LabelData.SCI_FI.getLabel()));
         // WHEN
-        videoRepository.createOrUpdate(video);
+        videoRepository.createOrUpdate(matrix);
         videoRepository.createOrUpdate(updated);
         // THEN
         assertThat(allVideos()).containsOnly(updated);
@@ -60,13 +60,25 @@ class VideoRepositoryTest {
     @Test
     void should_find_a_video_from_its_id() {
         // GIVEN
-        Video video = new Video(IdData.MATRIX.getId(), TitleData.MATRIX.getTitle(),
-                asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
-        videoRepository.createOrUpdate(video);
+        Video matrix = VideoData.MATRIX.toVideo();
+        videoRepository.createOrUpdate(matrix);
         // WHEN
-        Optional<Video> actual = videoRepository.find(video.id());
+        Optional<Video> actual = videoRepository.find(matrix.id());
         // THEN
-        assertThat(actual).isEqualTo(of(video));
+        assertThat(actual).isEqualTo(of(matrix));
+    }
+
+    @Test
+    void should_find_videos_from_a_title_keyword() {
+        // GIVEN
+        Video matrix = VideoData.MATRIX.toVideo();
+        Video matrix2 = VideoData.MATRIX_2.toVideo();
+        videoRepository.createOrUpdate(matrix);
+        videoRepository.createOrUpdate(matrix2);
+        // WHEN
+        List<Video> actual = videoRepository.searchByTitleKeyword("matrix");
+        // THEN
+        assertThat(actual).isEqualTo(asList(matrix, matrix2));
     }
 
 }

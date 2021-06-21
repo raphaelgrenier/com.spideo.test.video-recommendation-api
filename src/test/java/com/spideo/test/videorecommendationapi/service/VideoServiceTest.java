@@ -1,8 +1,7 @@
 package com.spideo.test.videorecommendationapi.service;
 
 import com.spideo.test.videorecommendationapi.data.IdData;
-import com.spideo.test.videorecommendationapi.data.LabelData;
-import com.spideo.test.videorecommendationapi.data.TitleData;
+import com.spideo.test.videorecommendationapi.data.VideoData;
 import com.spideo.test.videorecommendationapi.model.Video;
 import com.spideo.test.videorecommendationapi.repository.VideoRepository;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static java.util.Arrays.asList;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
@@ -25,12 +23,11 @@ class VideoServiceTest {
     @Test
     void should_add_a_video_through_the_repository() {
         // GIVEN
-        Video video = new Video(IdData.MATRIX.getId(), TitleData.MATRIX.getTitle(),
-                asList(LabelData.SCI_FI.getLabel(), LabelData.DYSTOPIA.getLabel()));
+        Video matrix = VideoData.MATRIX.toVideo();
         // WHEN
-        videoService.createOrUpdate(video);
+        videoService.createOrUpdate(matrix);
         // THEN
-        verify(videoRepository).createOrUpdate(video);
+        verify(videoRepository).createOrUpdate(matrix);
     }
 
     @Test
@@ -51,6 +48,16 @@ class VideoServiceTest {
         videoService.find(id);
         // THEN
         verify(videoRepository).find(id);
+    }
+
+    @Test
+    void should_find_videos_from_a_title_keyword() {
+        // GIVEN
+        String keyword = "keyword";
+        // WHEN
+        videoService.searchByTitleKeyword(keyword);
+        // THEN
+        verify(videoRepository).searchByTitleKeyword(keyword);
     }
 
 }
