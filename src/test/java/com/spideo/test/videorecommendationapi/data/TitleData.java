@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum TitleData {
 
+    UNKNOWN("unknown"),
     MATRIX("matrix"),
     MATRIX_2("matrix 2"),
     INDIANA_JONES("Indiana Jones : Raiders of the Lost Ark"),

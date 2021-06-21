@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,19 +69,6 @@ class VideoRepositoryTest {
         Optional<VideoType> actual = videoRepository.find(matrix.id());
         // THEN
         assertThat(actual).isEqualTo(of(matrix));
-    }
-
-    @Test
-    void should_find_videos_from_a_title_keyword() {
-        // GIVEN
-        Video matrix = VideoData.MATRIX.toVideo();
-        Video matrix2 = VideoData.MATRIX_2.toVideo();
-        videoRepository.createOrUpdate(matrix);
-        videoRepository.createOrUpdate(matrix2);
-        // WHEN
-        List<VideoType> actual = videoRepository.searchByTitleKeyword("matrix");
-        // THEN
-        assertThat(actual).isEqualTo(asList(matrix, matrix2));
     }
 
     @Test

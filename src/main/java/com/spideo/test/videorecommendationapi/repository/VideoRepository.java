@@ -10,9 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static java.util.Comparator.comparing;
 
 @Repository
 public class VideoRepository {
@@ -43,13 +40,6 @@ public class VideoRepository {
 
     public Optional<VideoType> find(@NonNull String id) {
         return Optional.ofNullable(videoCache.get(id));
-    }
-
-    public List<VideoType> searchByTitleKeyword(@NonNull String titleKeyword) {
-        return allVideos().stream()
-                .filter(video -> video.getTitle().contains(titleKeyword))
-                .sorted(comparing(VideoType::getTitle))
-                .collect(Collectors.toList());
     }
 
 }

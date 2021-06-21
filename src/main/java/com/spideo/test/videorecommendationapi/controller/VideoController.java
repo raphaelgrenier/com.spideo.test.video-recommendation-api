@@ -1,9 +1,11 @@
 package com.spideo.test.videorecommendationapi.controller;
 
 import com.spideo.test.videorecommendationapi.model.Video;
+import com.spideo.test.videorecommendationapi.model.VideoMatch;
 import com.spideo.test.videorecommendationapi.model.VideoType;
 import com.spideo.test.videorecommendationapi.service.VideoService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -34,8 +37,10 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class VideoController {
 
     static final String VIDEOS_PATH = "/videos";
+    static final String MATCH_PATH = "/match";
     static final String ID_PATH_PARAM = "/{id}";
     static final String TITLE_QUERY_PARAM = "title";
+    static final String MIN_COMMON_LABELS = "min-common-labels";
 
     private final VideoService videoService;
 
@@ -58,7 +63,7 @@ public class VideoController {
     @ApiOperation("Retrieves a video in the repository")
     @ApiResponse(code = SC_NOT_FOUND, message = "The requested video was not found in the repository")
     @GetMapping(value = ID_PATH_PARAM)
-    public VideoType find(@PathVariable String id) {
+    public VideoType find(@ApiParam("id of the video") @PathVariable String id) {
         return videoService.find(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -67,8 +72,22 @@ public class VideoController {
     @ApiResponse(code = SC_NOT_FOUND, message = "No video matching given title keyword was found")
     @GetMapping
     public List<VideoType> searchByTitleKeyword(
+            @ApiParam("Title keyword to search (at least 3 chars)")
             @RequestParam(value = TITLE_QUERY_PARAM) @Size(min = 3) String titleKeyword) {
         var result = videoService.searchByTitleKeyword(titleKeyword);
+        if (result.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return result;
+    }
+
+    @ApiOperation("Search other videos matching labels from the requested one")
+    @ApiResponse(code = SC_NOT_FOUND, message = "No matching video was found")
+    @PostMapping(path = MATCH_PATH)
+    public List<VideoType> searchByVideoMatch(@RequestBody @Validated VideoMatch videoMatch,
+                                              @ApiParam("The minimum common labels to match the requested one's")
+                                              @RequestParam(value = MIN_COMMON_LABELS) @Min(1) int minCommonLabels) {
+        var result = videoService.searchByVideoMatch(videoMatch, minCommonLabels);
         if (result.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }

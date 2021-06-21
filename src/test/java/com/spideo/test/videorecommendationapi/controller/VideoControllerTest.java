@@ -6,22 +6,26 @@ import com.spideo.test.videorecommendationapi.data.LabelData;
 import com.spideo.test.videorecommendationapi.data.TitleData;
 import com.spideo.test.videorecommendationapi.data.VideoData;
 import com.spideo.test.videorecommendationapi.model.Video;
+import com.spideo.test.videorecommendationapi.model.VideoMatch;
 import com.spideo.test.videorecommendationapi.service.VideoService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.spideo.test.videorecommendationapi.controller.VideoController.ID_PATH_PARAM;
+import static com.spideo.test.videorecommendationapi.controller.VideoController.MATCH_PATH;
+import static com.spideo.test.videorecommendationapi.controller.VideoController.MIN_COMMON_LABELS;
 import static com.spideo.test.videorecommendationapi.controller.VideoController.TITLE_QUERY_PARAM;
 import static com.spideo.test.videorecommendationapi.controller.VideoController.VIDEOS_PATH;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -82,7 +86,7 @@ class VideoControllerTest {
     void get_matrix_video_should_respond_success() throws Exception {
         String id = IdData.MATRIX.getId();
         Video video = VideoData.MATRIX.toVideo();
-        Mockito.when(videoService.find(id)).thenReturn(of(video));
+        when(videoService.find(id)).thenReturn(of(video));
         this.mockMvc.perform(get(VIDEOS_PATH + "/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(video), true));
@@ -91,7 +95,7 @@ class VideoControllerTest {
     @Test
     void get_unknown_video_should_respond_not_found() throws Exception {
         String id = IdData.UNKNOWN.getId();
-        Mockito.when(videoService.find(id)).thenReturn(empty());
+        when(videoService.find(id)).thenReturn(empty());
         this.mockMvc.perform(get(VIDEOS_PATH + ID_PATH_PARAM, id))
                 .andExpect(status().isNotFound());
     }
@@ -101,7 +105,7 @@ class VideoControllerTest {
         Video matrix = VideoData.MATRIX.toVideo();
         Video matrix2 = VideoData.MATRIX_2.toVideo();
         String titleKeyword = "tit";
-        Mockito.when(videoService.searchByTitleKeyword(titleKeyword)).thenReturn(asList(matrix, matrix2));
+        when(videoService.searchByTitleKeyword(titleKeyword)).thenReturn(asList(matrix, matrix2));
         this.mockMvc.perform(get(VIDEOS_PATH).param(TITLE_QUERY_PARAM, titleKeyword))
                 .andExpect(status().isOk());
     }
@@ -112,6 +116,51 @@ class VideoControllerTest {
         this.mockMvc.perform(get(VIDEOS_PATH).param(TITLE_QUERY_PARAM, titleKeyword))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(Matchers.containsString(BAD_REQUEST.getReasonPhrase())));
+    }
+
+    @Test
+    void post_malformed_video_match_should_respond_bad_request() throws Exception {
+        VideoMatch videoMatch = new VideoMatch(IdData.MATRIX.getId(), emptyList());
+        this.mockMvc.perform(post(VIDEOS_PATH + MATCH_PATH)
+                .param(MIN_COMMON_LABELS, "1")
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsBytes(videoMatch)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void post_malformed_video_match_min_should_respond_bad_request() throws Exception {
+        VideoMatch videoMatch = VideoData.MATRIX.toVideoMatch();
+        this.mockMvc.perform(post(VIDEOS_PATH + MATCH_PATH)
+                .param(MIN_COMMON_LABELS, "0")
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsBytes(videoMatch)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void post_video_no_match_should_respond_not_found() throws Exception {
+        VideoMatch videoMatch = VideoData.MATRIX.toVideoMatch();
+        int minCommonLabels = 1;
+        when(videoService.searchByVideoMatch(videoMatch, minCommonLabels)).thenReturn(emptyList());
+        this.mockMvc.perform(post(VIDEOS_PATH + MATCH_PATH)
+                .param(MIN_COMMON_LABELS, String.valueOf(minCommonLabels))
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsBytes(videoMatch)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void post_video_match_should_respond_success() throws Exception {
+        VideoMatch videoMatch = VideoData.MATRIX.toVideoMatch();
+        Video matchingVideo = VideoData.MATRIX_2.toVideo();
+        int minCommonLabels = 1;
+        when(videoService.searchByVideoMatch(videoMatch, minCommonLabels)).thenReturn(singletonList(matchingVideo));
+        this.mockMvc.perform(post(VIDEOS_PATH + MATCH_PATH)
+                .param(MIN_COMMON_LABELS, String.valueOf(minCommonLabels))
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsBytes(videoMatch)))
+                .andExpect(status().isOk());
     }
 
 }
