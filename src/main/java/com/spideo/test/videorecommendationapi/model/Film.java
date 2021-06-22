@@ -13,29 +13,34 @@ public record Film(@NotNull Video video,
 
     @Override
     @JsonIgnore
-    public String getId() {
+    public String id() {
         return video.id();
     }
 
     @Override
     @JsonIgnore
-    public String getTitle() {
+    public String title() {
         return video.title();
     }
 
     @Override
     @JsonIgnore
-    public List<String> getLabels() {
+    public List<String> labels() {
         return video.labels();
     }
 
     @Override
-    public String getDirector() {
+    public boolean isDeleted() {
+        return video.isDeleted();
+    }
+
+    @Override
+    public String director() {
         return director;
     }
 
     @Override
-    public ZonedDateTime getReleaseDate() {
+    public ZonedDateTime releaseDate() {
         return releaseDate;
     }
 

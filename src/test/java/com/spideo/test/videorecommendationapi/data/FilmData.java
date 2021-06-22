@@ -3,6 +3,7 @@ package com.spideo.test.videorecommendationapi.data;
 import com.spideo.test.videorecommendationapi.model.Film;
 import com.spideo.test.videorecommendationapi.model.Video;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -12,6 +13,7 @@ import static java.util.Arrays.asList;
 import static lombok.AccessLevel.PRIVATE;
 
 @AllArgsConstructor(access = PRIVATE)
+@Getter
 public enum FilmData {
 
     INDIANA_JONES(IdData.INDIANA_JONES, TitleData.INDIANA_JONES, DirectorData.STEVEN_SPIELBERG,

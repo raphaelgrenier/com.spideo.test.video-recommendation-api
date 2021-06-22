@@ -3,6 +3,7 @@ package com.spideo.test.videorecommendationapi.data;
 import com.spideo.test.videorecommendationapi.model.Video;
 import com.spideo.test.videorecommendationapi.model.VideoMatch;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import static java.util.Arrays.asList;
 import static lombok.AccessLevel.PRIVATE;
 
 @AllArgsConstructor(access = PRIVATE)
+@Getter
 public enum VideoData {
 
     UNKNOWN(IdData.UNKNOWN, TitleData.UNKNOWN, asList(LabelData.SCI_FI, LabelData.DYSTOPIA)),
@@ -26,6 +28,14 @@ public enum VideoData {
                 this.labels.stream()
                         .map(LabelData::getLabel)
                         .collect(Collectors.toList()));
+    }
+
+    public final Video toVideoDeleted() {
+        return new Video(id.getId(), title.getTitle(),
+                this.labels.stream()
+                        .map(LabelData::getLabel)
+                        .collect(Collectors.toList()),
+                true);
     }
 
     public final VideoMatch toVideoMatch() {

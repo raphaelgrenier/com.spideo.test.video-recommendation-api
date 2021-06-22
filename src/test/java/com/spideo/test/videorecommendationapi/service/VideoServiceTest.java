@@ -10,13 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @SpringBootTest
 class VideoServiceTest {
@@ -110,6 +115,46 @@ class VideoServiceTest {
         videoService.allTvShows();
         // THEN
         verify(videoRepository).allTvShows();
+    }
+
+    @Test
+    void should_throw_not_found_when_deleting_a_missing_video() {
+        // GIVEN
+        Video matrix = VideoData.MATRIX.toVideo();
+        when(videoRepository.find(matrix.id())).thenReturn(empty());
+        try {
+            // WHEN
+            videoService.delete(matrix.id());
+            // ELSE
+            fail("a %s with status %s should have been thrown"
+                    .formatted(ResponseStatusException.class.getName(), NOT_FOUND.name()));
+        } catch (ResponseStatusException e) {
+            // THEN
+            assertThat(e.getStatus()).isEqualTo(NOT_FOUND);
+        }
+    }
+
+    @Test
+    void should_delete_logically_a_video() {
+        // GIVEN
+        Video matrix = VideoData.MATRIX.toVideo();
+        Video matrixDeleted = VideoData.MATRIX.toVideoDeleted();
+        when(videoRepository.find(matrix.id())).thenReturn(of(matrix));
+        // WHEN
+        videoService.delete(matrix.id());
+        // THEN
+        when(videoRepository.find(matrix.id())).thenReturn(of(matrixDeleted));
+        videoService.find(matrix.id())
+                .ifPresentOrElse(deleted -> assertThat(deleted.isDeleted()).isTrue(),
+                        () -> fail("the video was not properly deleted"));
+    }
+
+    @Test
+    void should_get_all_deleted_videos() {
+        // WHEN
+        videoService.allDeleted();
+        // THEN
+        verify(videoRepository).allDeleted();
     }
 
 }

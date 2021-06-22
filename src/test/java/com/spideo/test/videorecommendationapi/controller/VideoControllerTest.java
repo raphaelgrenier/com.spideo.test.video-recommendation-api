@@ -13,8 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
+import static com.spideo.test.videorecommendationapi.controller.VideoController.DELETED_PATH;
 import static com.spideo.test.videorecommendationapi.controller.VideoController.ID_PATH_PARAM;
 import static com.spideo.test.videorecommendationapi.controller.VideoController.MATCH_PATH;
 import static com.spideo.test.videorecommendationapi.controller.VideoController.MIN_COMMON_LABELS;
@@ -25,9 +28,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -161,6 +166,36 @@ class VideoControllerTest {
                 .contentType(APPLICATION_JSON)
                 .content(mapper.writeValueAsBytes(videoMatch)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void delete_video_should_respond_not_found() throws Exception {
+        String id = IdData.UNKNOWN.getId();
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(videoService).delete(id);
+        this.mockMvc.perform(delete(VIDEOS_PATH + ID_PATH_PARAM, id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void delete_video_should_respond_success() throws Exception {
+        String id = IdData.MATRIX.getId();
+        this.mockMvc.perform(delete(VIDEOS_PATH + ID_PATH_PARAM, id))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void get_videos_deleted_should_respond_not_found() throws Exception {
+        when(videoService.allDeleted()).thenReturn(emptyList());
+        this.mockMvc.perform(get(VIDEOS_PATH + DELETED_PATH))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void get_videos_deleted_should_respond_success() throws Exception {
+        when(videoService.allDeleted()).thenReturn(singletonList(VideoData.MATRIX.toVideoDeleted()));
+        this.mockMvc.perform(get(VIDEOS_PATH + DELETED_PATH))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(singletonList(VideoData.MATRIX.toVideoDeleted()))));
     }
 
 }

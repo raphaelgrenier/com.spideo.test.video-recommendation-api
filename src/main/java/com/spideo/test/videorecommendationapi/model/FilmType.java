@@ -4,8 +4,8 @@ import java.time.ZonedDateTime;
 
 public interface FilmType {
 
-    String getDirector();
+    String director();
 
-    ZonedDateTime getReleaseDate();
+    ZonedDateTime releaseDate();
 
 }

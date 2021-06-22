@@ -11,24 +11,29 @@ public record TvShow(@NotNull Video video,
 
     @Override
     @JsonIgnore
-    public String getId() {
+    public String id() {
         return video.id();
     }
 
     @Override
     @JsonIgnore
-    public String getTitle() {
+    public String title() {
         return video.title();
     }
 
     @Override
     @JsonIgnore
-    public List<String> getLabels() {
-        return video.getLabels();
+    public List<String> labels() {
+        return video.labels();
     }
 
     @Override
-    public Integer getNumberOfEpisodes() {
+    public boolean isDeleted() {
+        return video().isDeleted();
+    }
+
+    @Override
+    public Integer numberOfEpisodes() {
         return numberOfEpisodes;
     }
 }

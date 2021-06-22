@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,7 @@ public class VideoController {
 
     static final String VIDEOS_PATH = "/videos";
     static final String MATCH_PATH = "/match";
+    static final String DELETED_PATH = "/deleted";
     static final String ID_PATH_PARAM = "/{id}";
     static final String TITLE_QUERY_PARAM = "title";
     static final String MIN_COMMON_LABELS = "min-common-labels";
@@ -55,15 +57,15 @@ public class VideoController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "The video posted in the request body was not formed properly")
     })
     @PostMapping
-    @ResponseStatus(value = NO_CONTENT)
+    @ResponseStatus(NO_CONTENT)
     public void createOrUpdate(@RequestBody @Validated Video video) {
         videoService.createOrUpdate(video);
     }
 
     @ApiOperation("Retrieves a video in the repository")
     @ApiResponse(code = SC_NOT_FOUND, message = "The requested video was not found in the repository")
-    @GetMapping(value = ID_PATH_PARAM)
-    public VideoType find(@ApiParam("id of the video") @PathVariable String id) {
+    @GetMapping(ID_PATH_PARAM)
+    public VideoType find(@ApiParam("id of the video to create or update") @PathVariable String id) {
         return videoService.find(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -73,7 +75,7 @@ public class VideoController {
     @GetMapping
     public List<VideoType> searchByTitleKeyword(
             @ApiParam("Title keyword to search (at least 3 chars)")
-            @RequestParam(value = TITLE_QUERY_PARAM) @Size(min = 3) String titleKeyword) {
+            @RequestParam(TITLE_QUERY_PARAM) @Size(min = 3) String titleKeyword) {
         var result = videoService.searchByTitleKeyword(titleKeyword);
         if (result.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -83,11 +85,34 @@ public class VideoController {
 
     @ApiOperation("Search other videos matching labels from the requested one")
     @ApiResponse(code = SC_NOT_FOUND, message = "No matching video was found")
-    @PostMapping(path = MATCH_PATH)
+    @PostMapping(MATCH_PATH)
     public List<VideoType> searchByVideoMatch(@RequestBody @Validated VideoMatch videoMatch,
                                               @ApiParam("The minimum common labels to match the requested one's")
                                               @RequestParam(value = MIN_COMMON_LABELS) @Min(1) int minCommonLabels) {
         var result = videoService.searchByVideoMatch(videoMatch, minCommonLabels);
+        if (result.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return result;
+    }
+
+    @ApiOperation("Deletes logically a video from its id if it exists")
+    @ApiResponse(code = SC_NOT_FOUND, message = "")
+    @ApiResponses({
+            @ApiResponse(code = SC_NO_CONTENT, message = "The video was successfully logically deleted"),
+            @ApiResponse(code = SC_NOT_FOUND, message = "No video with this id was found")
+    })
+    @DeleteMapping(ID_PATH_PARAM)
+    @ResponseStatus(NO_CONTENT)
+    public void delete(@ApiParam("id of the video to delete") @PathVariable String id) {
+        videoService.delete(id);
+    }
+
+    @ApiOperation("Retrieves all logically deleted videos in the repository")
+    @ApiResponse(code = SC_NOT_FOUND, message = "No deleted video was found")
+    @GetMapping(DELETED_PATH)
+    public List<VideoType> allDeleted() {
+        var result = videoService.allDeleted();
         if (result.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }

@@ -1,13 +1,18 @@
 package com.spideo.test.videorecommendationapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 public interface VideoType {
 
-    String getId();
+    String id();
 
-    String getTitle();
+    String title();
 
-    List<String> getLabels();
+    List<String> labels();
+
+    @JsonIgnore
+    boolean isDeleted();
 
 }

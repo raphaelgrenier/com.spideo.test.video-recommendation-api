@@ -93,4 +93,17 @@ class VideoRepositoryTest {
         assertThat(actual).isEqualTo(singletonList(stevenSpielberg));
     }
 
+    @Test
+    void should_get_all_deleted_videos() {
+        // GIVEN
+        Video matrix2 = VideoData.MATRIX_2.toVideo();
+        Video matrixDeleted = VideoData.MATRIX.toVideoDeleted();
+        videoRepository.createOrUpdate(matrix2);
+        videoRepository.createOrUpdate(matrixDeleted);
+        // WHEN
+        List<VideoType> allDeleted = videoRepository.allDeleted();
+        // THEN
+        assertThat(allDeleted).containsOnly(matrixDeleted);
+    }
+
 }
