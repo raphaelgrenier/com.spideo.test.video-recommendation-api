@@ -1,0 +1,6 @@
+## COMMON PROPERTIES
+project:
+  title: ^name^
+  description: ^description^
+  email: grenieraphael@gmail.com
+  version: ^version^
